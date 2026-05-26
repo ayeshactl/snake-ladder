@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'GAME_MODE', choices: ['normal', 'fast'], description: 'Select game mode')
+        choice(
+            name: 'GAME_MODE',
+            choices: ['normal', 'fast'],
+            description: 'Select game mode'
+        )
     }
 
     stages {
@@ -35,9 +39,25 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+        stage('Health Check') {
             steps {
-                echo "🚀 Deploying container..."
+                echo "🔍 Running application health check..."
+
+                sh """
+                    echo "Health check stage started"
+                """
+            }
+        }
+
+        stage('Run Container') {
+
+            // 🚀 Deploy only from master branch
+            when {
+                branch 'master'
+            }
+
+            steps {
+                echo "🚀 Deploying container from MASTER branch..."
 
                 sh """
                     docker stop snake || true
@@ -50,9 +70,9 @@ pipeline {
             }
         }
 
-        stage('Health Check') {
+        stage('Smoke Test') {
             steps {
-                echo "🔍 Checking application health..."
+                echo "🧪 Running smoke test..."
 
                 sh """
                     sleep 5
@@ -68,6 +88,7 @@ pipeline {
                 sh """
                     echo "Build Number: ${BUILD_NUMBER}" > build-info.txt
                     echo "Game Mode: ${params.GAME_MODE}" >> build-info.txt
+                    echo "Branch: ${BRANCH_NAME}" >> build-info.txt
                     echo "Docker Image: snake-game:${BUILD_NUMBER}" >> build-info.txt
                     echo "Status: SUCCESS" >> build-info.txt
                 """
@@ -79,6 +100,7 @@ pipeline {
 
         success {
             echo "✅ Pipeline SUCCESS - Snake Game deployed!"
+
             archiveArtifacts artifacts: 'build-info.txt', fingerprint: true
         }
 
