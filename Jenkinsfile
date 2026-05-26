@@ -56,6 +56,15 @@ pipeline {
             }
         }
     }
+    stage('Create Build Report') {
+    steps {
+        sh """
+            echo "Build Number: ${BUILD_NUMBER}" > build-info.txt
+            echo "Game Mode: ${params.GAME_MODE}" >> build-info.txt
+            echo "Docker Image: snake-game:${BUILD_NUMBER}" >> build-info.txt
+        """
+    }
+}
 
     post {
         success {
