@@ -5,37 +5,45 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/ayeshactl/snake-ladder.git'
+                echo "📥 Cloning repository..."
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t snake-game .'
+                echo "🐳 Building Docker image..."
+                sh 'docker build -t snake-game:latest .'
             }
         }
 
-        stage('Stop Old Container') {
+        stage('Run Container') {
             steps {
-                sh 'docker stop snake || true'
-                sh 'docker rm snake || true'
+                echo "🚀 Deploying container..."
+                sh '''
+                    docker stop snake || true
+                    docker rm snake || true
+                    docker run -d -p 8081:80 --name snake snake-game:latest
+                '''
             }
         }
 
-        stage('Run New Container') {
+        stage('Smoke Test') {
             steps {
-                sh 'docker run -d -p 8081:80 --name snake snake-game'
+                echo "🧪 Testing application..."
+                sh 'curl -f http://localhost:8081 || exit 1'
             }
         }
+
     }
 
     post {
         success {
-            echo "🎮 Snake Game deployed successfully!"
+            echo "✅ Pipeline SUCCESS - Game deployed!"
         }
 
         failure {
-            echo "❌ Build failed. Check logs."
+            echo "❌ Pipeline FAILED"
         }
     }
 }
