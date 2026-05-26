@@ -21,6 +21,7 @@ parameters {
             docker build -t snake-game:${BUILD_NUMBER} .
             docker tag snake-game:${BUILD_NUMBER} snake-game:latest
         """
+           echo "🎮 Running in mode: ${params.GAME_MODE}"
     }
 }
     stage('Run Container') {
@@ -30,7 +31,9 @@ parameters {
             docker stop snake || true
             docker rm snake || true
             docker run -d -p 8081:80 --name snake snake-game:${BUILD_NUMBER}
-        """
+            docker run -d -p 8081:80 --name snake-${params.GAME_MODE} snake-game:${BUILD_NUMBER}
+           """
+        
     }
 }
 
