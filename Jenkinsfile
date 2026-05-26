@@ -27,20 +27,23 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
-            steps {
-                echo "🚀 Deploying container..."
+      stage('Run Container') {
+    steps {
+        echo "🚀 Deploying container..."
 
-                sh """
-                    docker stop snake || true
-                    docker rm snake || true
+        sh """
+            docker stop snake-normal || true
+            docker rm snake-normal || true
 
-                    docker run -d -p 8081:80 \
-                        --name snake-${params.GAME_MODE} \
-                        snake-game:${BUILD_NUMBER}
-                """
-            }
-        }
+            docker stop snake-fast || true
+            docker rm snake-fast || true
+
+            docker run -d -p 8081:80 \
+                --name snake \
+                snake-game:${BUILD_NUMBER}
+        """
+    }
+}
 
         stage('Smoke Test') {
             steps {
