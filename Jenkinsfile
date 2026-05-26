@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+parameters {
+    choice(name: 'GAME_MODE', choices: ['normal', 'fast'], description: 'Select game mode')
+}
+
     stages {
 
         stage('Checkout Code') {
