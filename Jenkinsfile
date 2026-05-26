@@ -10,13 +10,15 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                echo "🐳 Building Docker image..."
-                sh 'docker build -t snake-game:latest .'
-            }
-        }
-
+       stage('Build Docker Image') {
+    steps {
+        echo "🐳 Building Docker image..."
+        sh """
+            docker build -t snake-game:${BUILD_NUMBER} .
+            docker tag snake-game:${BUILD_NUMBER} snake-game:latest
+        """
+    }
+}
         stage('Run Container') {
             steps {
                 echo "🚀 Deploying container..."
