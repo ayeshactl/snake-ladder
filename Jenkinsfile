@@ -49,26 +49,23 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+       stage('Run Container') {
+    when {
+        branch 'master'
+    }
 
-            // 🚀 Deploy only from master branch
-            when {
-                branch 'master'
-            }
+    steps {
+        echo "🚀 Deploying latest container..."
 
-            steps {
-                echo "🚀 Deploying container from MASTER branch..."
+        sh """
+            docker rm -f snake || true
 
-                sh """
-                    docker stop snake || true
-                    docker rm snake || true
-
-                    docker run -d -p 8081:80 \
-                        --name snake \
-                        snake-game:${BUILD_NUMBER}
-                """
-            }
-        }
+            docker run -d -p 8081:80 \
+                --name snake \
+                snake-game:${BUILD_NUMBER}
+        """
+    }
+}
 
         stage('Smoke Test') {
             steps {
